@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DailyShare - 记录生活，分享美好</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#165DFF',
+            secondary: '#36CFC9',
+            accent: '#722ED1',
+            neutral: {
+              100: '#F2F3F5',
+              200: '#E5E6EB',
+              300: '#C9CDD4',
+              400: '#86909C',
+              500: '#4E5969',
+              600: '#272E3B',
+              700: '#1D2129',
+            }
+          },
+          fontFamily: {
+            inter: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.5s ease-in-out',
+            'slide-up': 'slideUp 0.5s ease-out',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(20px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' },
+            }
+          },
+        },
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .text-shadow {
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .card-hover {
+        transition: all 0.3s ease;
+      }
+      .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+      .bg-gradient-primary {
+        background: linear-gradient(135deg, #165DFF 0%, #722ED1 100%);
+      }
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+      .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+    }
+  </style>
+</head>
+<body class="font-inter bg-neutral-100 text-neutral-700 min-h-screen flex flex-col">
+  <!-- 导航栏 -->
+  <header id="navbar" class="fixed w-full top-0 z-50 transition-all duration-300 bg-white/90 backdrop-blur-md shadow-sm">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center">
+          <a href="#" class="flex items-center">
+            <i class="fa-solid fa-feather text-primary text-2xl mr-2"></i>
+            <span class="text-xl font-bold text-neutral-700">DailyShare</span>
+          </a>
+          <nav class="hidden md:ml-10 md:flex space-x-8">
+            <a href="#home" class="text-primary font-medium hover:text-primary/80 transition-colors">首页</a>
+            <a href="#journals" class="text-neutral-600 font-medium hover:text-primary transition-colors">日志</a>
+            <a href="#categories" class="text-neutral-600 font-medium hover:text-primary transition-colors">分类</a>
+            <a href="#about" class="text-neutral-600 font-medium hover:text-primary transition-colors">关于我</a>
+          </nav>
+        </div>
+        <div class="flex items-center">
+          <button id="searchBtn" class="p-2 rounded-full text-neutral-600 hover:bg-neutral-100 transition-colors mr-2">
+            <i class="fa-solid fa-search"></i>
+          </button>
+          <button id="themeToggle" class="p-2 rounded-full text-neutral-600 hover:bg-neutral-100 transition-colors mr-2">
+            <i class="fa-solid fa-moon"></i>
+          </button>
+          <button id="createBtn" class="hidden sm:flex items-center bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition-colors shadow-md hover:shadow-lg">
+            <i class="fa-solid fa-plus mr-2"></i>
+            <span>新建日志</span>
+          </button>
+          <button id="mobileMenuBtn" class="md:hidden p-2 rounded-md text-neutral-600 hover:bg-neutral-100 transition-colors">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 移动端菜单 -->
+    <div id="mobileMenu" class="hidden md:hidden bg-white border-t border-neutral-200 shadow-lg animate-fade-in">
+      <div class="px-4 py-3 space-y-3">
+        <a href="#home" class="block text-primary font-medium">首页</a>
+        <a href="#journals" class="block text-neutral-600 font-medium">日志</a>
+        <a href="#categories" class="block text-neutral-600 font-medium">分类</a>
+        <a href="#about" class="block text-neutral-600 font-medium">关于我</a>
+        <button class="w-full flex items-center justify-center bg-primary text-white px-4 py-2 rounded-full hover:bg-primary/90 transition-colors shadow-md">
+          <i class="fa-solid fa-plus mr-2"></i>
+          <span>新建日志</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- 搜索框 -->
+    <div id="searchBox" class="hidden bg-white border-t border-neutral-200 shadow-lg animate-fade-in">
+      <div class="container mx-auto px-4 py-3">
+        <div class="relative">
+          <input type="text" placeholder="搜索日志..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+          <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"></i>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主内容 -->
+  <main class="flex-grow pt-20">
+    <!-- 英雄区域 -->
+    <section id="home" class="bg-gradient-primary text-white py-16 md:py-24">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl mx-auto text-center">
+          <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold mb-6 leading-tight text-shadow animate-slide-up">
+            记录生活中的每一个<span class="text-secondary">美好瞬间</span>
+          </h1>
+          <p class="text-[clamp(1rem,2vw,1.25rem)] text-white/90 mb-8 animate-slide-up" style="animation-delay: 0.1s">
+            用文字和图片捕捉生活中的点滴，分享你的思考、感受和经验，让每一天都变得有意义。
+          </p>
+          <div class="flex flex-col sm:flex-row justify-center gap-4 animate-slide-up" style="animation-delay: 0.2s">
+            <button class="bg-white text-primary px-6 py-3 rounded-full font-medium hover:bg-neutral-100 transition-colors shadow-lg hover:shadow-xl">
+              开始记录
+            </button>
+            <button class="bg-transparent border-2 border-white text-white px-6 py-3 rounded-full font-medium hover:bg-white/10 transition-colors">
+              浏览日志
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 最近日志 -->
+    <section id="journals" class="py-16 bg-white">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-neutral-700 mb-4">最近日志</h2>
+          <p class="text-neutral-500 max-w-2xl mx-auto">记录生活中的每一个重要时刻，分享你的故事和经验</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <!-- 日志卡片 1 -->
+          <article class="bg-white rounded-xl overflow-hidden shadow-md card-hover">
+            <div class="relative h-48 overflow-hidden">
+              <img src="https://picsum.photos/600/400?random=1" alt="旅行照片" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+              <div class="absolute top-4 left-4 bg-primary/90 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                旅行
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center text-sm text-neutral-500 mb-3">
+                <i class="fa-solid fa-calendar-days mr-2"></i>
+                <span>2025年5月15日</span>
+              </div>
+              <h3 class="text-xl font-bold text-neutral-800 mb-3">探索云南大理的奇妙之旅</h3>
+              <p class="text-neutral-600 mb-4 line-clamp-3">
+                大理的风花雪月名不虚传，苍山洱海的美景让人流连忘返。这次旅行不仅让我领略了大自然的壮美，也让我感受到了当地白族文化的独特魅力...
+              </p>
+              <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                  <img src="https://picsum.photos/32/32?random=101" alt="作者头像" class="w-8 h-8 rounded-full mr-2">
+                  <span class="text-sm font-medium text-neutral-700">旅行者小明</span>
+                </div>
+                <a href="#" class="text-primary font-medium hover:text-primary/80 transition-colors">
+                  阅读更多 <i class="fa-solid fa-arrow-right ml-1 text-xs"></i>
+                </a>
+              </div>
+            </div>
+          </article>
+          
+          <!-- 日志卡片 2 -->
+          <article class="bg-white rounded-xl overflow-hidden shadow-md card-hover">
+            <div class="relative h-48 overflow-hidden">
+              <img src="https://picsum.photos/600/400?random=2" alt="美食照片" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+              <div class="absolute top-4 left-4 bg-accent/90 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                美食
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center text-sm text-neutral-500 mb-3">
+                <i class="fa-solid fa-calendar-days mr-2"></i>
+                <span>2025年5月12日</span>
+              </div>
+              <h3 class="text-xl font-bold text-neutral-800 mb-3">自制意式手工披萨的完美配方</h3>
+              <p class="text-neutral-600 mb-4 line-clamp-3">
+                经过多次尝试和调整，我终于找到了制作完美意式手工披萨的配方。从面团的发酵到配料的选择，每一步都至关重要...
+              </p>
+              <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                  <img src="https://picsum.photos/32/32?random=102" alt="作者头像" class="w-8 h-8 rounded-full mr-2">
+                  <span class="text-sm font-medium text-neutral-700">美食家小李</span>
+                </div>
+                <a href="#" class="text-primary font-medium hover:text-primary/80 transition-colors">
+                  阅读更多 <i class="fa-solid fa-arrow-right ml-1 text-xs"></i>
+                </a>
+              </div>
+            </div>
+          </article>
+          
+          <!-- 日志卡片 3 -->
+          <article class="bg-white rounded-xl overflow-hidden shadow-md card-hover">
+            <div class="relative h-48 overflow-hidden">
+              <img src="https://picsum.photos/600/400?random=3" alt="读书笔记" class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
+              <div class="absolute top-4 left-4 bg-secondary/90 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                阅读
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center text-sm text-neutral-500 mb-3">
+                <i class="fa-solid fa-calendar-days mr-2"></i>
+                <span>2025年5月8日</span>
+              </div>
+              <h3 class="text-xl font-bold text-neutral-800 mb-3">《人类简史》读后感：从认知革命到未来简史</h3>
+              <p class="text-neutral-600 mb-4 line-clamp-3">
+                尤瓦尔·赫拉利的《人类简史》带我穿越了人类从原始石器时代到21世纪的漫长历程。这本书不仅是一部历史，更是对人类未来的深刻思考...
+              </p>
+              <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                  <img src="https://picsum.photos/32/32?random=103" alt="作者头像" class="w-8 h-8 rounded-full mr-2">
+                  <span class="text-sm font-medium text-neutral-700">书虫小张</span>
+                </div>
+                <a href="#" class="text-primary font-medium hover:text-primary/80 transition-colors">
+                  阅读更多 <i class="fa-solid fa-arrow-right ml-1 text-xs"></i>
+                </a>
+              </div>
+            </div>
+          </article>
+        </div>
+        
+        <div class="text-center mt-12">
+          <button class="bg-white border border-primary text-primary px-6 py-3 rounded-full font-medium hover:bg-primary/5 transition-colors">
+            查看更多日志 <i class="fa-solid fa-chevron-down ml-2"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 分类区域 -->
+    <section id="categories" class="py-16 bg-neutral-50">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+          <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-neutral-700 mb-4">探索分类</h2>
+          <p class="text-neutral-500 max-w-2xl mx-auto">浏览不同主题的日志，发现更多感兴趣的内容</p>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <!-- 分类项 1 -->
+          <a href="#" class="bg-white rounded-xl p-6 text-center shadow-sm hover:shadow-md transition-shadow card-hover">
+            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fa-solid fa-plane text-primary text-xl"></i>
+            </div>
+            <h3 class="font-medium text-neutral-800">旅行</h3>
+            <p class="text-sm text-neutral-500 mt-1">42 篇日志</p>
+          </a>
+          
+          <!-- 分类项 2 -->
+          <a href="#" class="bg-white rounded-xl p-6 text-center shadow-sm hover:shadow-md transition-shadow card-hover">
+            <div class="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fa-solid fa-utensils text-accent text-xl"></i>
+            </div>
+            <h3 class="font-medium text-neutral-800">美食</h3>
+            <p class="text-sm text-neutral-500 mt-1">28 篇日志</p>
+          </a>
+          
+          <!-- 分类项 3 -->
+          <a href="#" class="bg-white rounded-xl p-6 text-center shadow-sm hover:shadow-md transition-shadow card-hover">
+            <div class="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fa-solid fa-book text-secondary text-xl"></i>
+            </div>
+            <h3 class="font-medium text-neutral-800">阅读</h3>
+            <p class="text-sm text-neutral-500 mt-1">35 篇日志</p>
+          </a>
+          
+          <!-- 分类项 4 -->
+          <a href="#" class="bg-white rounded-xl p-6 text-center shadow-sm hover:shadow-md transition-shadow card-hover">
+            <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fa-solid fa-music text-amber-500 text-xl"></i>
+            </div>
+            <h3 class="font-medium text-neutral-800">音乐</h3>
+            <p class="text-sm text-neutral-500 mt-1">19 篇日志</p>
+          </a>
+          
+          <!-- 分类项 5 -->
+          <a href="#" class="bg-white rounded-xl p-6 text-center shadow-sm hover:shadow-md transition-shadow card-hover">
+            <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fa-solid fa-tree text-emerald-500 text-xl"></i>
+            </div>
+            <h3 class="font-medium text-neutral-800">自然</h3>
+            <p class="text-sm text-neutral-500 mt-1">23 篇日志</p>
+          </a>
+          
+          <!-- 分类项 6 -->
+          <a href="#" class="bg-white rounded-xl p-6 text-center shadow-sm hover:shadow-md transition-shadow card-hover">
+            <div class="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fa-solid fa-heart text-rose-500 text-xl"></i>
+            </div>
+            <h3 class="font-medium text-neutral-800">生活</h3>
+            <p class="text-sm text-neutral-500 mt-1">56 篇日志</p>
+          </a>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 关于我 -->
+    <section id="about" class="py-16 bg-white">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div class="relative">
+              <div class="absolute -top-4 -left-4 w-full h-full border-4 border-primary/20 rounded-2xl"></div>
+              <img src="https://picsum.photos/600/600?random=10" alt="关于我" class="w-full h-auto rounded-2xl shadow-xl">
+              <div class="absolute -bottom-6 -right-6 bg-white p-4 rounded-xl shadow-lg">
+                <div class="flex items-center">
+                  <div class="flex -space-x-2">
+                    <img src="https://picsum.photos/32/32?random=201" alt="粉丝头像" class="w-8 h-8 rounded-full border-2 border-white">
+                    <img src="https://picsum.photos/32/32?random=202" alt="粉丝头像" class="w-8 h-8 rounded-full border-2 border-white">
+                    <img src="https://picsum.photos/32/32?random=203" alt="粉丝头像" class="w-8 h-8 rounded-full border-2 border-white">
+                  </div>
+                  <span class="ml-2 text-sm font-medium text-neutral-700">1.2k+ 关注者</span>
+                </div>
+              </div>
+            </div>
+            
+            <div>
+              <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-neutral-700 mb-4">关于我</h2>
+              <p class="text-neutral-600 mb-6 leading-relaxed">
+                你好，我是一名热爱生活的记录者。这个博客是我分享生活点滴、旅行经历、阅读感悟和美食探索的地方。
+              </p>
+              <p class="text-neutral-600 mb-6 leading-relaxed">
+                我相信每一个人都有自己独特的故事，每一个瞬间都值得被记录。通过文字和图片，我希望能够留住这些美好的时刻，也希望能够与你分享我的所见所闻所想。
+              </p>
+              <div class="flex flex-wrap gap-3 mb-8">
+                <span class="bg-primary/10 text-primary px-4 py-1 rounded-full text-sm">旅行爱好者</span>
+                <span class="bg-accent/10 text-accent px-4 py-1 rounded-full text-sm">美食探索者</span>
+                <span class="bg-secondary/10 text-secondary px-4 py-1 rounded-full text-sm">阅读分享者</span>
+                <span class="bg-amber-100 text-amber-500 px-4 py-1 rounded-full text-sm">摄影爱好者</span>
+              </div>
+              <div class="flex space-x-4">
+                <a href="#" class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-colors">
+                  <i class="fa-brands fa-weibo"></i>
+                </a>
+                <a href="#" class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-colors">
+                  <i class="fa-brands fa-wechat"></i>
+                </a>
+                <a href="#" class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-colors">
+                  <i class="fa-brands fa-instagram"></i>
+                </a>
+                <a href="#" class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-colors">
+                  <i class="fa-brands fa-twitter"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 订阅区域 -->
+    <section class="py-16 bg-gradient-primary text-white">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl mx-auto text-center">
+          <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mb-6">订阅我的日志</h2>
+          <p class="text-white/90 mb-8 text-lg">
+            获取最新日志和独家内容，直接发送到您的邮箱
+          </p>
+          <form class="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
+            <input type="email" placeholder="您的邮箱地址" class="flex-grow px-4 py-3 rounded-full focus:outline-none focus:ring-2 focus:ring-white/30 text-neutral-700">
+            <button type="submit" class="bg-white text-primary px-6 py-3 rounded-full font-medium hover:bg-neutral-100 transition-colors shadow-lg hover:shadow-xl">
+              订阅
+            </button>
+          </form>
+          <p class="text-white/70 text-sm mt-4">
+            我们尊重您的隐私，不会向第三方分享您的信息
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="bg-neutral-800 text-white py-12">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div class="md:col-span-1">
+          <div class="flex items-center mb-4">
+            <i class="fa-solid fa-feather text-primary text-2xl mr-2"></i>
+            <span class="text-xl font-bold">DailyShare</span>
+          </div>
+          <p class="text-neutral-400 mb-4">
+            记录生活，分享美好。每一天都值得被记录。
+          </p>
+          <div class="flex space-x-4">
+            <a href="#" class="text-neutral-400 hover:text-primary transition-colors">
+              <i class="fa-brands fa-weibo"></i>
+            </a>
+            <a href="#" class="text-neutral-400 hover:text-primary transition-colors">
+              <i class="fa-brands fa-wechat"></i>
+            </a>
+            <a href="#" class="text-neutral-400 hover:text-primary transition-colors">
+              <i class="fa-brands fa-instagram"></i>
+            </a>
+            <a href="#" class="text-neutral-400 hover:text-primary transition-colors">
+              <i class="fa-brands fa-twitter"></i>
+            </a>
+          </div>
+        </div>
+        
+        <div>
+          <h3 class="text-lg font-medium mb-4">快速链接</h3>
+          <ul class="space-y-2">
+            <li><a href="#home" class="text-neutral-400 hover:text-primary transition-colors">首页</a></li>
+            <li><a href="#journals" class="text-neutral-400 hover:text-primary transition-colors">日志</a></li>
+            <li><a href="#categories" class="text-neutral-400 hover:text-primary transition-colors">分类</a></li>
+            <li><a href="#about" class="text-neutral-400 hover:text-primary transition-colors">关于我</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="text-lg font-medium mb-4">分类</h3>
+          <ul class="space-y-2">
+            <li><a href="#" class="text-neutral-400 hover:text-primary transition-colors">旅行</a></li>
+            <li><a href="#" class="text-neutral-400 hover:text-primary transition-colors">美食</a></li>
+            <li><a href="#" class="text-neutral-400 hover:text-primary transition-colors">阅读</a></li>
+            <li><a href="#" class="text-neutral-400 hover:text-primary transition-colors">音乐</a></li>
+            <li><a href="#" class="text-neutral-400 hover:text-primary transition-colors">生活</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="text-lg font-medium mb-4">联系方式</h3>
+          <ul class="space-y-2">
+            <li class="flex items-center text-neutral-400">
+              <i class="fa-solid fa-envelope mr-2 text-primary"></i>
+              <span>contact@dailyshare.com</span>
+            </li>
+            <li class="flex items-center text-neutral-400">
+              <i class="fa-solid fa-phone mr-2 text-primary"></i>
+              <span>+86 123 4567 8910</span>
+            </li>
+            <li class="flex items-center text-neutral-400">
+              <i class="fa-solid fa-map-marker mr-2 text-primary"></i>
+              <span>北京市朝阳区</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="border-t border-neutral-700 mt-12 pt-8 text-center text-neutral-500 text-sm">
+        <p>&copy; 2025 DailyShare. 保留所有权利。</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 新建日志模态框 -->
+  <div id="newJournalModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-auto shadow-2xl animate-fade-in">
+      <div class="p-6 border-b border-neutral-200 flex justify-between items-center">
+        <h3 class="text-xl font-bold text-neutral-800">新建日志</h3>
+        <button id="closeModalBtn" class="text-neutral-500 hover:text-neutral-700">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+      <div class="p-6">
+        <form>
+          <div class="mb-4">
+            <label for="journalTitle" class="block text-sm font-medium text-neutral-700 mb-1">标题</label>
+            <input type="text" id="journalTitle" class="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary" placeholder="输入日志标题">
+          </div>
+          
+          <div class="mb-4">
+            <label for="journalCategory" class="block text-sm font-medium text-neutral-700 mb-1">分类</label>
+            <select id="journalCategory" class="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+              <option value="travel">旅行</option>
+              <option value="food">美食</option>
+              <option value="reading">阅读</option>
+              <option value="music">音乐</option>
+              <option value="nature">自然</option>
+              <option value="life">生活</option>
+            </select>
+          </div>
+          
+          <div class="mb-4">
+            <label for="journalContent" class="block text-sm font-medium text-neutral-700 mb-1">内容</label>
+            <textarea id="journalContent" rows="8" class="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary" placeholder="输入日志内容..."></textarea>
+          </div>
+          
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-neutral-700 mb-1">添加图片</label>
+            <div class="flex items-center justify-center w-full">
+              <label for="file-upload" class="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-neutral-300 rounded-lg cursor-pointer bg-neutral-50 hover:bg-neutral-100 transition-colors">
+                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                  <i class="fa-solid fa-cloud-upload text-3xl text-neutral-400 mb-2"></i>
+                  <p class="mb-2 text-sm text-neutral-500"><span class="font-medium">点击上传图片</span> 或拖放文件</p>
+                  <p class="text-xs text-neutral-400">支持 JPG, PNG, GIF 格式</p>
+                </div>
+                <input id="file-upload" type="file" class="hidden" accept="image/*" />
+              </label>
+            </div>
+          </div>
+          
+          <div class="flex justify-end gap-4 pt-4 border-t border-neutral-200">
+            <button type="button" id="cancelJournalBtn" class="px-4 py-2 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 transition-colors">
+              取消
+            </button>
+            <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+              发布日志
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 导航栏滚动效果
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        navbar.classList.add('shadow-md');
+        navbar.classList.remove('bg-white/90');
+        navbar.classList.add('bg-white');
+      } else {
+        navbar.classList.remove('shadow-md');
+        navbar.classList.add('bg-white/90');
+        navbar.classList.remove('bg-white');
+      }
+    });
+    
+    // 移动端菜单
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+    
+    // 搜索框
+    const searchBtn = document.getElementById('searchBtn');
+    const searchBox = document.getElementById('searchBox');
+    
+    searchBtn.addEventListener('click', () => {
+      searchBox.classList.toggle('hidden');
+      mobileMenu.classList.add('hidden'); // 关闭移动菜单
+    });
+    
+    // 主题切换
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = themeToggle.querySelector('i');
+    
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      if (themeIcon.classList.contains('fa-moon')) {
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+      } else {
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
+      }
+    });
+    
+    // 新建日志模态框
+    const createBtn = document.getElementById('createBtn');
+    const newJournalModal = document.getElementById('newJournalModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const cancelJournalBtn = document.getElementById('cancelJournalBtn');
+    
+    function openModal() {
+      newJournalModal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden'; // 防止背景滚动
+    }
+    
+    function closeModal() {
+      newJournalModal.classList.add('hidden');
+      document.body.style.overflow = 'auto'; // 恢复背景滚动
+    }
+    
+    createBtn.addEventListener('click', openModal);
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelJournalBtn.addEventListener('click', closeModal);
+    
+    // 点击模态框外部关闭
+    newJournalModal.addEventListener('click', (e) => {
+      if (e.target === newJournalModal) {
+        closeModal();
+      }
+    });
+    
+    // 平滑滚动
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        
+        const targetId = this.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+        
+        if (targetElement) {
+          window.scrollTo({
+            top: targetElement.offsetTop - 80, // 考虑导航栏高度
+            behavior: 'smooth'
+          });
+          
+          // 如果是在移动设备上点击导航链接，关闭移动菜单
+          if (window.innerWidth < 768) {
+            mobileMenu.classList.add('hidden');
+          }
+        }
+      });
+    });
+    
+    // 模拟文件上传
+    const fileUpload = document.getElementById('file-upload');
+    if (fileUpload) {
+      fileUpload.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+          // 这里可以添加预览图片的功能
+          console.log('文件上传:', file.name);
+        }
+      });
+    }
+    
+    // 模拟表单提交
+    const journalForm = document.querySelector('#newJournalModal form');
+    if (journalForm) {
+      journalForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // 这里可以添加表单验证和提交逻辑
+        console.log('表单提交');
+        
+        // 模拟提交成功后关闭模态框
+        setTimeout(() => {
+          closeModal();
+          // 显示成功提示（这里可以添加一个toast组件）
+          alert('日志发布成功！');
+        }, 500);
+      });
+    }
+  </script>
+</body>
+</html>
+    
